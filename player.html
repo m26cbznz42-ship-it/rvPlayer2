@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>TV Player</title>
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#p{position:fixed;top:0;left:0;width:100%;height:100%}</style></head>
+<body><div id="p"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+var id=new URLSearchParams(location.search).get("v"), pl=null, vol=50, muted=false;
+function say(ev,d){ parent.postMessage({tvd:1,ev:ev,d:d},"*"); }
+function apply(){ if(!pl||!pl.setVolume) return; pl.setVolume(vol); if(muted) pl.mute(); else pl.unMute(); }
+function onYouTubeIframeAPIReady(){
+  pl=new YT.Player("p",{width:"100%",height:"100%",videoId:id,
+    playerVars:{autoplay:1,controls:0,disablekb:1,fs:0,rel:0,modestbranding:1,playsinline:1,iv_load_policy:3,loop:1,playlist:id},
+    events:{onReady:function(e){ apply(); e.target.playVideo(); say("ready"); },
+            onStateChange:function(e){ if(e.data===0) e.target.playVideo(); },
+            onError:function(e){ say("err",e.data); }}});
+}
+addEventListener("message",function(e){ var m=e.data||{}; if(!m.tvd) return;
+  if(m.vol!=null) vol=m.vol; if(m.muted!=null) muted=m.muted; apply(); });
+</script></body></html>
